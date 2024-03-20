@@ -1,6 +1,7 @@
 package com.springboot.blog.controller;
 
 import com.springboot.blog.Payload.PostDto;
+import com.springboot.blog.Payload.PostResponse;
 import com.springboot.blog.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,17 +24,19 @@ public class PostController {
             return new ResponseEntity<>(postService.createPost(postDto), HttpStatus.CREATED);
         }
     
-//        @GetMapping
-//        public List<PostDto> getAllPosts(){
-//            return postService.getAllPosts();
+//      @GetMapping
+//      public List<PostDto> getAllPosts(){
+//          return postService.getAllPosts();
 //        }
 
         @GetMapping
-        public List<PostDto> getAllPosts(
+        public PostResponse getAllPosts(
                 @RequestParam(value = "PageNo", defaultValue = "0", required = false) int PageNo,
-                @RequestParam(value = "PageSize", defaultValue = "10", required = false) int PageSize
+                @RequestParam(value = "PageSize", defaultValue = "10", required = false) int PageSize,
+                @RequestParam(value = "SortBy", defaultValue = "id", required = false) String SortBy
+
         ){
-            return postService.getAllPosts(PageNo,PageSize);
+            return postService.getAllPosts(PageNo,PageSize,SortBy);
         }
 
         @GetMapping("/{id}")

@@ -29,7 +29,8 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto createComment(long PostId, CommentDto commentDto) {
         Comment comment = MapToEntity(commentDto);
         //retrieve post by id
-        Post post = postRepository.findById(PostId).orElseThrow(()-> new ResourceNotFoundException("Post", "id", PostId));
+        Post post = postRepository.findById(PostId).orElseThrow(
+                ()-> new ResourceNotFoundException("Post", "id", PostId));
         //set Post to comment Entity
         comment.setPost(post);
         //comment entity to database
@@ -48,14 +49,34 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto getCommentById(Long PostId, Long CommentId) {
         //retrieve post entity by id
-        Post post = postRepository.findById(PostId).orElseThrow(()-> new ResourceNotFoundException("Post", "id", PostId));
+        Post post = postRepository.findById(PostId).orElseThrow(
+                ()-> new ResourceNotFoundException("Post", "id", PostId));
         //retrieve comment entity by id
-        Comment comment = commentRepository.findById(CommentId).orElseThrow(()-> new ResourceNotFoundException("Comment", "Id", CommentId));
+        Comment comment = commentRepository.findById(CommentId).orElseThrow(
+                ()-> new ResourceNotFoundException("Comment", "Id", CommentId));
         if(!comment.getPost().getId().equals(post.getId()))
         {
             throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Comment does not belong to the post");
         }
         return MapToDto(comment);
+    }
+
+    @Override
+    public CommentDto updateComment(Long PostId, Long CommentId, CommentDto commentRequest) {
+        //retrieve post entity by id
+        Post post = postRepository.findById(PostId).orElseThrow(
+                ()-> new ResourceNotFoundException("Post", "id", PostId));
+        Comment comment = commentRepository.findById(CommentId).orElseThrow(
+                ()-> new ResourceNotFoundException("Comment", "Id", CommentId));
+        if (!comment.getPost().getId().equals(post.getId())){
+            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Comment does not belong to the post");
+
+        }
+        comment.setName(commentRequest.getName());
+        comment.setEmail(commentRequest.getEmail());
+        comment.setBody(commentRequest.getBody());
+        Comment updatedComment = commentRepository.save(comment);
+        return MapToDto(updatedComment);
     }
 
 

@@ -3,12 +3,17 @@ package com.springboot.blog.service.impl;
 import com.springboot.blog.Payload.CommentDto;
 import com.springboot.blog.entity.Comment;
 import com.springboot.blog.entity.Post;
+import com.springboot.blog.exception.BlogAPIException;
 import com.springboot.blog.exception.ResourceNotFoundException;
 import com.springboot.blog.repository.CommentRepository;
 import com.springboot.blog.repository.PostRepository;
 import com.springboot.blog.service.CommentService;
 import jakarta.persistence.Id;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -31,6 +36,28 @@ public class CommentServiceImpl implements CommentService {
         Comment newComment = commentRepository.save(comment);
         return MapToDto(newComment);
     }
+
+    @Override
+    public List<CommentDto> GetCommentsByPostId(long PostId) {
+        // Retrieve Comments by PostId
+        List<Comment> comments = commentRepository.findByPostId(PostId);
+        // Convert list of comment entities to list of comment DTO's
+        return comments.stream().map(comment -> MapToDto(comment)).collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto getCommentById(Long PostId, Long CommentId) {
+        //retrieve post entity by id
+        Post post = postRepository.findById(PostId).orElseThrow(()-> new ResourceNotFoundException("Post", "id", PostId));
+        //retrieve comment entity by id
+        Comment comment = commentRepository.findById(CommentId).orElseThrow(()-> new ResourceNotFoundException("Comment", "Id", CommentId));
+        if(!comment.getPost().getId().equals(post.getId()))
+        {
+            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Comment does not belong to the post");
+        }
+        return MapToDto(comment);
+    }
+
 
     private CommentDto MapToDto(Comment comment){
         CommentDto commentDto = new CommentDto();
